@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arcade Prisma</title>
+<style>
+:root{--bg:#0b0b1a;--bg2:#1b1040;--ink:#f3f0ff;--mut:#a9a3d1;--card:#ffffff14;--line:#ffffff2b;--a:#22d3ee;--b:#c084fc;--c:#fb7185;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f5f2ff;--bg2:#dcd3ff;--ink:#1b1740;--mut:#5b5690;--card:#ffffffb8;--line:#1b174030;color-scheme:light}}
+:root[data-theme="light"]{--bg:#f5f2ff;--bg2:#dcd3ff;--ink:#1b1740;--mut:#5b5690;--card:#ffffffb8;--line:#1b174030;color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;color:var(--ink);background:var(--bg);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(60% 50% at 15% 10%,#22d3ee33,transparent),radial-gradient(55% 50% at 90% 20%,#c084fc40,transparent),radial-gradient(60% 60% at 50% 100%,#fb718533,transparent),linear-gradient(160deg,var(--bg),var(--bg2))}
+.bg::after{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;opacity:.35;mask-image:radial-gradient(circle at 50% 30%,#000,transparent 75%);-webkit-mask-image:radial-gradient(circle at 50% 30%,#000,transparent 75%)}
+.wrap{max-width:900px;margin:auto;padding:18px 16px 40px}
+h1{font-size:clamp(2rem,8vw,3.4rem);margin:10px 0 2px;letter-spacing:.04em;background:linear-gradient(90deg,var(--a),var(--b),var(--c));-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center}
+.sub{text-align:center;color:var(--mut);margin:0 0 24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.gc{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;color:var(--ink);text-align:left;cursor:pointer;font:inherit;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .2s,box-shadow .2s}
+.gc:hover{transform:translateY(-5px);box-shadow:0 12px 34px -10px var(--k)}
+.gc i{font-style:normal;font-size:2.4rem;display:block;filter:drop-shadow(0 0 12px var(--k))}
+.gc b{display:block;font-size:1.15rem;margin:8px 0 4px}.gc span{color:var(--mut);font-size:.9rem}
+.gc em{display:block;margin-top:10px;font-style:normal;font-size:.8rem;color:var(--k)}
+.bar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.bar h2{margin:0;font-size:1.4rem}
+button.b{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:14px;padding:10px 14px;font:inherit;cursor:pointer;min-height:44px;min-width:44px;touch-action:manipulation}
+button.b:active{transform:scale(.94)}
+.tw{display:flex;gap:12px;justify-content:center;align-items:flex-start}
+.side{display:flex;flex-direction:column;gap:8px;width:92px}
+.st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 10px;text-align:center}
+.st h3{margin:0;font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.st b{font-size:1.3rem;font-variant-numeric:tabular-nums}
+canvas{display:block;border-radius:16px;background:#080818;box-shadow:0 0 0 1px #ffffff22,0 0 40px -6px var(--b)}
+#bd{width:min(52vw,300px);height:auto}
+.pad{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.pad .b{font-size:1.3rem;width:56px;height:52px;padding:0}
+.hint{text-align:center;color:var(--mut);font-size:.85rem;margin-top:10px}
+.sg{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:430px;margin:auto}
+.sg div{aspect-ratio:1;display:grid;place-items:center;font-weight:700;font-size:clamp(.8rem,3.6vw,1.15rem);border-radius:9px;background:var(--card);border:1px solid var(--line);cursor:pointer;user-select:none;transition:background .15s}
+.sg .sel{outline:2px solid var(--a);background:#22d3ee44}
+.sg .f{color:#0b0b1a;border-color:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0}
+.chips span{padding:6px 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-weight:700;letter-spacing:.06em;font-size:.85rem}
+.chips .ok{text-decoration:line-through;opacity:.5}
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:400px;margin:auto}
+.cd{aspect-ratio:1;border-radius:16px;border:1px solid var(--line);background:linear-gradient(135deg,#22d3ee33,#c084fc33);display:grid;place-items:center;font-size:clamp(1.6rem,9vw,2.6rem);cursor:pointer;user-select:none;transition:transform .25s}
+.cd.o{background:var(--card);transform:rotateY(0deg) scale(1.04)}
+.cd.m{box-shadow:0 0 22px #4ade8099;border-color:#4ade80}
+.msg{text-align:center;font-size:1.1rem;min-height:1.6em;margin:12px 0;color:var(--a)}
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1245">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap" id="app"></div>
+<script>
+const $=(s,e=document)=>e.querySelector(s);
+const sv=(k,v)=>{try{localStorage.setItem("pr-"+k,v)}catch(e){}};
+const ld=k=>{try{return +localStorage.getItem("pr-"+k)||0}catch(e){return 0}};
+const shuf=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+const app=$("#app");let stop=null;
+
+/* ---------- Bloque con brillo (compartido) ---------- */
+function blk(c,x,y,s,col,a=1){c.save();c.globalAlpha=a;c.shadowColor=col;c.shadowBlur=s*.55;
+const g=c.createLinearGradient(x,y,x+s,y+s);g.addColorStop(0,"#ffffffcc");g.addColorStop(.3,col);g.addColorStop(1,col+"88");
+c.fillStyle=g;c.beginPath();c.roundRect(x+1.5,y+1.5,s-3,s-3,s*.24);c.fill();c.shadowBlur=0;c.strokeStyle="#ffffff66";c.lineWidth=1;c.stroke();c.restore()}
+
+/* ---------- TETRIS ---------- */
+const SH={I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],O:[[1,1],[1,1]],T:[[0,1,0],[1,1,1],[0,0,0]],S:[[0,1,1],[1,1,0],[0,0,0]],Z:[[1,1,0],[0,1,1],[0,0,0]],J:[[1,0,0],[1,1,1],[0,0,0]],L:[[0,0,1],[1,1,1],[0,0,0]]};
+const COL={I:"#22d3ee",O:"#facc15",T:"#c084fc",S:"#4ade80",Z:"#fb7185",J:"#60a5fa",L:"#fb923c"};
+function tetris(box){
+const C=10,R=20,S=30;
+box.innerHTML=`<div class="tw"><div class="side"><div class="st"><h3>Siguiente</h3><canvas id="nx" width="80" height="80" style="width:70px;margin:4px auto;box-shadow:none"></canvas></div><div class="st"><h3>Puntos</h3><b id="sc">0</b></div><div class="st"><h3>Nivel</h3><b id="lv">1</b></div><div class="st"><h3>Líneas</h3><b id="ln">0</b></div><div class="st"><h3>Récord</h3><b id="bs">0</b></div></div><canvas id="bd" width="300" height="600"></canvas></div>
+<div class="pad"><button class="b" data-a="l">◀</button><button class="b" data-a="d">▼</button><button class="b" data-a="r">▶</button><button class="b" data-a="u">⟳</button><button class="b" data-a="s">⤓</button><button class="b" data-a="p">⏯</button></div>
+<p class="hint">Flechas: mover y girar · Espacio: caída · P: pausa · Enter: reiniciar</p>`;
+const g=$("#bd",box).getContext("2d"),nx=$("#nx",box).getContext("2d");
+let b,cur,nxt,bag=[],sc,lv,ln,acc,last,raf,over,paused,parts=[],best=ld("tetris");
+const pick=()=>{if(!bag.length)bag=shuf(Object.keys(SH));return bag.pop()};
+const mk=t=>({t,m:SH[t].map(r=>[...r]),x:Math.floor((C-SH[t][0].length)/2),y:0});
+const hit=(m,x,y)=>m.some((r,j)=>r.some((v,i)=>v&&(x+i<0||x+i>=C||y+j>=R||(y+j>=0&&b[y+j][x+i]))));
+const ui=()=>{$("#sc",box).textContent=sc;$("#lv",box).textContent=lv;$("#ln",box).textContent=ln;$("#bs",box).textContent=best};
+function reset(){b=Array.from({length:R},()=>Array(C).fill(null));sc=0;lv=1;ln=0;acc=0;over=false;paused=false;parts=[];nxt=mk(pick());spawn();ui()}
+function spawn(){cur=nxt;nxt=mk(pick());if(hit(cur.m,cur.x,cur.y)){over=true;if(sc>best){best=sc;sv("tetris",best)}ui()}}
+function lock(){cur.m.forEach((r,j)=>r.forEach((v,i)=>{if(v&&cur.y+j>=0)b[cur.y+j][cur.x+i]=COL[cur.t]}));
+let n=0;for(let y=R-1;y>=0;y--){if(b[y].every(Boolean)){for(let i=0;i<C;i++)for(let k=0;k<4;k++)parts.push({x:(i+.5)*S,y:(y+.5)*S,vx:(Math.random()-.5)*7,vy:(Math.random()-.7)*6,l:1,c:b[y][i]});b.splice(y,1);b.unshift(Array(C).fill(null));n++;y++}}
+if(n){sc+=[0,100,300,500,800][n]*lv;ln+=n;lv=1+Math.floor(ln/10)}spawn();ui()}
+const down=()=>{if(!hit(cur.m,cur.x,cur.y+1)){cur.y++;return true}lock();return false};
+function act(a){if(a==="p"){paused=!paused;return}if(over){if(a==="s"||a==="u")reset();return}if(paused)return;
+if(a==="l"&&!hit(cur.m,cur.x-1,cur.y))cur.x--;
+if(a==="r"&&!hit(cur.m,cur.x+1,cur.y))cur.x++;
+if(a==="d"){down();sc++;ui()}
+if(a==="s"){while(down())sc+=2;ui()}
+if(a==="u"){const m=cur.m[0].map((_,i)=>cur.m.map(r=>r[i]).reverse());for(const k of[0,-1,1,-2,2])if(!hit(m,cur.x+k,cur.y)){cur.m=m;cur.x+=k;break}}}
+const KM={ArrowLeft:"l",ArrowRight:"r",ArrowDown:"d",ArrowUp:"u",x:"u"," ":"s",p:"p",P:"p"};
+const kd=e=>{if(e.key==="Enter"){reset();return}const a=KM[e.key];if(a){e.preventDefault();act(a)}};
+document.addEventListener("keydown",kd);
+box.querySelectorAll(".pad .b").forEach(x=>x.addEventListener("pointerdown",e=>{e.preventDefault();act(x.dataset.a)}));
+function draw(){const gr=g.createLinearGradient(0,0,0,600);gr.addColorStop(0,"#0d0d26");gr.addColorStop(1,"#1a0f3a");g.fillStyle=gr;g.fillRect(0,0,300,600);
+g.strokeStyle="#ffffff0d";g.lineWidth=1;for(let i=1;i<C;i++){g.beginPath();g.moveTo(i*S,0);g.lineTo(i*S,600);g.stroke()}for(let j=1;j<R;j++){g.beginPath();g.moveTo(0,j*S);g.lineTo(300,j*S);g.stroke()}
+b.forEach((r,j)=>r.forEach((c,i)=>c&&blk(g,i*S,j*S,S,c)));
+if(!over){let gy=cur.y;while(!hit(cur.m,cur.x,gy+1))gy++;cur.m.forEach((r,j)=>r.forEach((v,i)=>v&&(blk(g,(cur.x+i)*S,(gy+j)*S,S,COL[cur.t],.22),blk(g,(cur.x+i)*S,(cur.y+j)*S,S,COL[cur.t]))))}
+parts.forEach(p=>{g.globalAlpha=Math.max(p.l,0);g.fillStyle=p.c;g.beginPath();g.arc(p.x,p.y,3*p.l+1,0,7);g.fill()});g.globalAlpha=1;
+nx.clearRect(0,0,80,80);const m=nxt.m,s=Math.min(20,64/m.length),ox=(80-m[0].length*s)/2,oy=(80-m.length*s)/2;m.forEach((r,j)=>r.forEach((v,i)=>v&&blk(nx,ox+i*s,oy+j*s,s,COL[nxt.t])));
+if(over||paused){g.fillStyle="#000000a0";g.fillRect(0,0,300,600);g.fillStyle="#fff";g.textAlign="center";g.font="bold 30px Trebuchet MS";g.fillText(over?"FIN DEL JUEGO":"PAUSA",150,290);g.font="15px Trebuchet MS";g.fillStyle="#a9a3d1";g.fillText(over?"Pulsa Enter o ⤓ para reintentar":"Pulsa P o ⏯ para seguir",150,322)}}
+function loop(t){raf=requestAnimationFrame(loop);const dt=Math.min(t-(last||t),100);last=t;
+if(!over&&!paused){acc+=dt;if(acc>Math.max(90,800-(lv-1)*70)){acc=0;down()}}
+parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.15;p.l-=.025});parts=parts.filter(p=>p.l>0);draw()}
+reset();raf=requestAnimationFrame(loop);
+return()=>{cancelAnimationFrame(raf);document.removeEventListener("keydown",kd)}}
+
+/* ---------- SOPA DE LETRAS ---------- */
+function sopa(box){
+const N=10,W=["ESTRELLA","GALAXIA","PLANETA","COMETA","ORBITA","COHETE","LUNA"],D=[[1,0],[0,1],[1,1],[1,-1]];
+let G,sel,found;
+function build(){G=Array(N*N).fill("");found={};sel=null;
+shuf(W).sort((a,c)=>c.length-a.length).forEach(w=>{for(let t=0;t<300;t++){const[dx,dy]=D[Math.floor(Math.random()*4)],x=Math.floor(Math.random()*N),y=Math.floor(Math.random()*N),ex=x+dx*(w.length-1),ey=y+dy*(w.length-1);
+if(ex<0||ex>=N||ey<0||ey>=N)continue;let ok=true;for(let k=0;k<w.length;k++){const c=G[(y+dy*k)*N+x+dx*k];if(c&&c!==w[k])ok=false}
+if(ok){for(let k=0;k<w.length;k++)G[(y+dy*k)*N+x+dx*k]=w[k];break}}});
+G=G.map(c=>c||"ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"[Math.floor(Math.random()*27)]);render()}
+function render(){box.innerHTML=`<div class="chips">${W.map(w=>`<span class="${found[w]!=null?"ok":""}">${w}</span>`).join("")}</div><div class="sg">${G.map((c,i)=>`<div data-i="${i}" class="${sel===i?"sel":""}">${c}</div>`).join("")}</div><p class="msg" id="mg">${Object.keys(found).length===W.length?"¡Las encontraste todas! ✨":"Toca la primera y la última letra de cada palabra"}</p><div class="pad"><button class="b" id="nw" style="width:auto;padding:0 18px;font-size:1rem">Nueva sopa</button></div>`;
+Object.entries(found).forEach(([w,o])=>o.forEach(i=>{const e=box.querySelector(`[data-i="${i}"]`);e.classList.add("f");e.style.background=`hsl(${W.indexOf(w)*50+170} 85% 65%)`}));
+$("#nw",box).onclick=build;
+box.querySelectorAll(".sg div").forEach(d=>d.onclick=()=>tap(+d.dataset.i))}
+function tap(i){if(sel===null){sel=i;render();return}
+const ax=sel%N,ay=Math.floor(sel/N),bx=i%N,by=Math.floor(i/N),dx=bx-ax,dy=by-ay;sel=null;
+if(!(dx===0||dy===0||Math.abs(dx)===Math.abs(dy))){render();return}
+const n=Math.max(Math.abs(dx),Math.abs(dy)),sx=Math.sign(dx),sy=Math.sign(dy),cells=[];for(let k=0;k<=n;k++)cells.push((ay+sy*k)*N+ax+sx*k);
+const s=cells.map(c=>G[c]).join(""),r=[...s].reverse().join(""),w=W.find(w=>w===s||w===r);
+if(w&&found[w]==null)found[w]=cells;render();if(w&&found[w])$("#mg",box).textContent="¡Encontraste "+w+"!"}
+build();return()=>{}}
+
+/* ---------- MEMORIA ---------- */
+function memoria(box){
+const E=["🌙","⭐","🪐","🚀","☄️","🌍","🛰️","👽"];let cs,op,mv,lock,tm;
+function build(){cs=shuf([...E,...E]).map((e,i)=>({e,s:0}));op=[];mv=0;lock=false;render()}
+function render(msg){box.innerHTML=`<p class="msg">Movimientos: <b>${mv}</b> · Récord: <b>${ld("memo")||"–"}</b></p><div class="mg">${cs.map((c,i)=>`<div class="cd ${c.s?"o":""} ${c.s===2?"m":""}" data-i="${i}">${c.s?c.e:"✦"}</div>`).join("")}</div><p class="msg">${msg||""}</p><div class="pad"><button class="b" id="nw" style="width:auto;padding:0 18px;font-size:1rem">Reiniciar</button></div>`;
+$("#nw",box).onclick=build;box.querySelectorAll(".cd").forEach(d=>d.onclick=()=>flip(+d.dataset.i))}
+function flip(i){if(lock||cs[i].s)return;cs[i].s=1;op.push(i);
+if(op.length<2){render();return}
+mv++;const[a,c]=op;op=[];
+if(cs[a].e===cs[c].e){cs[a].s=cs[c].s=2;if(cs.every(x=>x.s===2)){const r=ld("memo");if(!r||mv<r)sv("memo",mv);render("¡Completado en "+mv+" movimientos! 🎉");return}render();return}
+lock=true;render();tm=setTimeout(()=>{cs[a].s=cs[c].s=0;lock=false;render()},750)}
+build();return()=>clearTimeout(tm)}
+
+/* ---------- SNAKE ---------- */
+function snake(box){
+const N=20,Z=20;
+box.innerHTML=`<p class="msg">Puntos: <b id="sc">0</b> · Récord: <b id="bs">0</b></p><canvas id="cv" width="400" height="400" style="width:min(92vw,400px);margin:auto"></canvas><div class="pad"><button class="b" data-a="u">▲</button></div><div class="pad" style="margin-top:6px"><button class="b" data-a="l">◀</button><button class="b" data-a="d">▼</button><button class="b" data-a="r">▶</button></div><p class="hint">Flechas o WASD · Enter reinicia</p>`;
+const g=$("#cv",box).getContext("2d");let s,d,q,f,sc,over,tm,best=ld("snake"),t0=0;
+const V={l:[-1,0],r:[1,0],u:[0,-1],d:[0,1]};
+function reset(){s=[[10,10],[9,10],[8,10]];d=V.r;q=[];sc=0;over=false;food();ui();clearInterval(tm);tm=setInterval(step,115)}
+const ui=()=>{$("#sc",box).textContent=sc;$("#bs",box).textContent=best};
+function food(){do f=[Math.floor(Math.random()*N),Math.floor(Math.random()*N)];while(s.some(p=>p[0]===f[0]&&p[1]===f[1]))}
+function turn(a){if(over){reset();return}const v=V[a],l=q.length?q[q.length-1]:d;if(v[0]+l[0]||v[1]+l[1])q.push(v)}
+function step(){if(over)return;if(q.length)d=q.shift();const h=[s[0][0]+d[0],s[0][1]+d[1]];
+if(h[0]<0||h[1]<0||h[0]>=N||h[1]>=N||s.some(p=>p[0]===h[0]&&p[1]===h[1])){over=true;if(sc>best){best=sc;sv("snake",best)}ui();return}
+s.unshift(h);if(h[0]===f[0]&&h[1]===f[1]){sc+=10;food();ui()}else s.pop()}
+const KM={ArrowLeft:"l",ArrowRight:"r",ArrowUp:"u",ArrowDown:"d",a:"l",d:"r",w:"u",s:"d"};
+const kd=e=>{if(e.key==="Enter"){reset();return}const a=KM[e.key];if(a){e.preventDefault();turn(a)}};
+document.addEventListener("keydown",kd);
+box.querySelectorAll(".pad .b").forEach(x=>x.addEventListener("pointerdown",e=>{e.preventDefault();turn(x.dataset.a)}));
+let raf;function draw(t){raf=requestAnimationFrame(draw);const gr=g.createLinearGradient(0,0,400,400);gr.addColorStop(0,"#0d0d26");gr.addColorStop(1,"#1a0f3a");g.fillStyle=gr;g.fillRect(0,0,400,400);
+g.strokeStyle="#ffffff0a";for(let i=1;i<N;i++){g.beginPath();g.moveTo(i*Z,0);g.lineTo(i*Z,400);g.moveTo(0,i*Z);g.lineTo(400,i*Z);g.stroke()}
+const p=1+Math.sin(t/180)*.2;g.save();g.shadowColor="#fb7185";g.shadowBlur=18;g.fillStyle="#fb7185";g.beginPath();g.arc(f[0]*Z+10,f[1]*Z+10,6*p,0,7);g.fill();g.restore();
+s.forEach((c,i)=>blk(g,c[0]*Z,c[1]*Z,Z,i?`hsl(${170+i*6} 85% 60%)`.replace(/^hsl\((\d+) 85% 60%\)$/,(m,h)=>"#"+[0,1,2].map(k=>Math.round(hl(+h%360,.85,.6)[k]*255).toString(16).padStart(2,"0")).join("")):"#ffffff"));
+if(over){g.fillStyle="#000000a0";g.fillRect(0,0,400,400);g.fillStyle="#fff";g.textAlign="center";g.font="bold 30px Trebuchet MS";g.fillText("FIN DEL JUEGO",200,200);g.font="15px Trebuchet MS";g.fillStyle="#a9a3d1";g.fillText("Pulsa Enter o cualquier flecha",200,230)}}
+function hl(h,s,l){const a=s*Math.min(l,1-l),f=n=>{const k=(n+h/30)%12;return l-a*Math.max(-1,Math.min(k-3,9-k,1))};return[f(0),f(8),f(4)]}
+reset();raf=requestAnimationFrame(draw);
+return()=>{clearInterval(tm);cancelAnimationFrame(raf);document.removeEventListener("keydown",kd)}}
+
+/* ---------- HUB ---------- */
+const GAMES=[
+{id:"tetris",t:"Bloques Prisma",i:"🧊",d:"Tetris con brillo, fantasma y partículas.",k:"#22d3ee",f:tetris,r:()=>"Récord: "+ld("tetris")},
+{id:"sopa",t:"Sopa de letras",i:"🔠",d:"Encuentra 7 palabras del espacio.",k:"#c084fc",f:sopa,r:()=>"Se genera nueva cada vez"},
+{id:"memoria",t:"Memoria estelar",i:"🪐",d:"Empareja los 8 símbolos cósmicos.",k:"#4ade80",f:memoria,r:()=>"Mejor: "+(ld("memo")||"–")+" mov."},
+{id:"snake",t:"Serpiente neón",i:"🐍",d:"Come, crece y no choques.",k:"#fb7185",f:snake,r:()=>"Récord: "+ld("snake")}];
+function route(){if(stop){stop();stop=null}const id=location.hash.slice(1),G=GAMES.find(x=>x.id===id);
+if(!G){app.innerHTML=`<h1>ARCADE PRISMA</h1><p class="sub">Elige un juego · todo funciona sin internet</p><div class="grid">${GAMES.map(x=>`<button class="gc" style="--k:${x.k}" data-id="${x.id}"><i>${x.i}</i><b>${x.t}</b><span>${x.d}</span><em>${x.r()}</em></button>`).join("")}</div>`;
+app.querySelectorAll(".gc").forEach(b=>b.onclick=()=>location.hash=b.dataset.id);return}
+app.innerHTML=`<div class="bar"><button class="b" id="bk">← Menú</button><h2>${G.i} ${G.t}</h2></div><div id="gm"></div>`;
+$("#bk").onclick=()=>location.hash="";stop=G.f($("#gm"))}
+addEventListener("hashchange",route);route();
+</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}</script>
+</body>
+</html>
